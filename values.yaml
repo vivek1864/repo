@@ -1,0 +1,117 @@
+# Default values for glorifi.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+ovaledgeAutoscling:
+  enabled: true
+jobPodReplicaCount: 1
+jobPodMaximumReplicaCount: 1
+userPodReplicaCount: 1
+userPodMaximumReplicaCount: 1
+
+
+image:
+  repository: viveksannapaneni/ovaledge
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "oe"
+imageCredentials:
+  name: ovaledge
+  registry: https://hub.docker.com/repository/docker/viveksannapaneni/ovaledge/general
+  username: viveksannapaneni
+  password: Vivek@1992
+dbdetails:
+  enabled: true
+  #OE: Specify keys for Ovaledge rds mysql property keys
+  OVALEDGE_MYSQL_ENDPOINT: "nv-mysql.mysql.database.azure.com"
+  DRIVER_CLASS_NAME: "com.mysql.jdbc.Driver"
+  OVALEDGE_MYSQL_URL: "jdbc:mysql://nv-mysql.mysql.database.azure.com:3306/ovaledgedb?useSSL=true&requiredSSL=false"
+  OVALEDGE_MYSQL_USER: "vivek@vi-mysql"
+  OVALEDGE_MYSQL_PWORD: "0valEdge!"
+  OE: Specify your own encryption value in text format
+  OVALEDGE_ENCRYPT_DECRYPT_KEY: "ovaledge2021"
+  DB_MAX_CONNECTION: '1000'
+  DB_MAX_IDLE: '500'
+  OE: Specify db or saml 
+  OVALEDGE_SECURITY_TYPE: "db"
+  OE: If secyrity type is 'saml' configure the  properties below
+  OVALEDGE_SAML_META_DATA: "https://login.microsoftonline.com/c717a2aa-3648-46e2-aae6-a5f4a51947db/federationmetadata/2007-06/federationmetadata.xml?appid=558d737c-febf-43fe-b84a-6f49d8e927fe"
+  SAML_METADATA_TYPE: "url"
+  ENTITY_BASE_PROTOCOL: "http"
+  OE: Specify hostname mapped to kubernetes cluster
+  ENTITY_BASE_HOST: "eks.ovaledge.net"
+  ENTITY_BASE_CONTEXTPATH: ""
+  ENTITY_BASE_PORT: "8080"
+  ENTITY_BASE_PORT_INURL: "false"
+  ENTITY_BASE_ISLB: "true"
+  ENTITY_BASE_URL: "http://eks.ovaledge.net"
+  OE: Specify certificate_encoded data using base64 using https://base64.guru/converter/encode/file 
+  
+  certificate_key: "certificatekey"
+  SAML_PATH: "/usr/local/tomcat/conf/saml"
+  saml_path: "/usr/local/tomcat/conf/saml/"
+  ES_HOST: "a35d3b3ad22fd4588a7d89941e45aff3-1285647164.ap-south-1.elb.amazonaws.com"
+  ES_PORT: "9200"
+  ES_USERNAME: "elastic"
+  ES_PASSWORD: "0valEdge!"
+  ES_PROTOCOL: "http"
+containerPort: 8080
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: NodePort
+  port: 80
+
+ingress:
+  enabled: false
+  hostname: oeapp.ovaledge.net
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+  hosts:
+    - host: oeapp.ovaledge.net
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: oeapp-tls
+      hosts: 
+        - oeapp.ovaledge.net
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

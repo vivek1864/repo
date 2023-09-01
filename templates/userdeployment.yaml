@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "ovaledge-ui-deployment"
+  labels:
+    {{- include "ovaldgehelmchart.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ovaldgehelmchart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ovaldgehelmchart.selectorLabels" . | nindent 8 }}
+    spec:
+      imagePullSecrets:
+       - name: {{ .Values.imageCredentials.name }}
+      #serviceAccountName: oesa
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: DRIVER_CLASS_NAME
+              value: {{ .Values.dbdetails.DRIVER_CLASS_NAME | quote }}
+            - name: OVALEDGE_MYSQL_USER
+              value: {{ .Values.dbdetails.OVALEDGE_MYSQL_USER | quote }}       
+            - name: OVALEDGE_MYSQL_PWORD
+              value: {{ .Values.dbdetails.OVALEDGE_MYSQL_PWORD | quote }}
+            - name: OVALEDGE_MYSQL_URL
+              value: {{ .Values.dbdetails.OVALEDGE_MYSQL_URL | quote }}
+            - name: OVALEDGE_MYSQL_READ_URL
+              value: {{ .Values.dbdetails.OVALEDGE_MYSQL_URL | quote }}
+            - name: OVALEDGE_ENCRYPT_DECRYPT_KEY
+              value: ovaledge2021
+            - name: READ_DB_MAX_CONNECTION
+              value: '51'
+            - name: READ_DB_MAX_IDLE
+              value: '20'
+            - name: DB_MAX_CONNECTION
+              value: {{ .Values.dbdetails.DB_MAX_CONNECTION | quote }}
+            - name: DB_MAX_IDLE
+              value: {{ .Values.dbdetails.DB_MAX_IDLE | quote }}
+            - name: encryptdecryptkey
+              value: {{ .Values.dbdetails.encryptdecryptkey | quote }}                     
+            - name: OVALEDGE_ENCRYPT_DECRYPT_KEY
+              value: {{ .Values.dbdetails.OVALEDGE_ENCRYPT_DECRYPT_KEY | quote }}
+            - name: OVALEDGE_SAML_META_DATA
+              value: {{ .Values.dbdetails.OVALEDGE_SAML_META_DATA | quote }}
+            - name: OVALEDGE_SECURITY_TYPE
+              value: {{ .Values.dbdetails.OVALEDGE_SECURITY_TYPE | quote }}
+            - name: SAML_METADATA_TYPE
+              value: {{ .Values.dbdetails.SAML_METADATA_TYPE | quote }}
+            - name: ENTITY_BASE_PROTOCOL
+              value: {{ .Values.dbdetails.ENTITY_BASE_PROTOCOL | quote }}
+            - name: ENTITY_BASE_HOST
+              value: {{ .Values.dbdetails.ENTITY_BASE_HOST | quote }}
+            - name: ENTITY_BASE_CONTEXTPATH
+              value: {{ .Values.dbdetails.ENTITY_BASE_CONTEXTPATH | quote }}
+            - name: ENTITY_BASE_PORT
+              value: {{ .Values.dbdetails.ENTITY_BASE_PORT | quote }}
+            - name: ENTITY_BASE_PORT_INURL
+              value: {{ .Values.dbdetails.ENTITY_BASE_PORT_INURL | quote }}
+            - name: ENTITY_BASE_ISLB
+              value: {{ .Values.dbdetails.ENTITY_BASE_ISLB | quote }}
+            - name: SAML_PATH
+              value: {{ .Values.dbdetails.SAML_PATH | quote }}
+            - name: saml_path
+              value: {{ .Values.dbdetails.saml_path | quote }}
+            - name: entityBaseURL
+              value: {{ .Values.dbdetails.ENTITY_BASE_URL | quote }}
+            - name: ES_HOST
+              value: {{ .Values.dbdetails.ES_HOST | quote }}
+            - name: ES_PORT
+              value: {{ .Values.dbdetails.ES_PORT | quote }}
+            - name: ES_USERNAME
+              value: {{ .Values.dbdetails.ES_USERNAME | quote }}
+            - name: ES_PASSWORD
+              value: {{ .Values.dbdetails.ES_PASSWORD | quote }}
+            - name: ES_PROTOCOL
+              value: {{ .Values.dbdetails.ES_PROTOCOL | quote }}
+            - name: ext.properties.dir
+              value: {{ .Values.dbdetails.ext_properties_dir | quote }}
+            - name: KEY
+              value: {{ .Values.dbdetails.KEY | quote }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
